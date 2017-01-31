@@ -1,2 +1,2 @@
-# SVM_dual-primal-solution
+# SVM_dual primal solution
 provide dual solution for generalized SVM
