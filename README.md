@@ -11,4 +11,6 @@ subject to $$\alpha_i \geq 0$$ and $$\sum_i \alpha_i y_i = 0$$ for $$i = 1,...,n
 
 ```py
 import mathlabplot
+import scipy
+import numpy
 ```
