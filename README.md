@@ -9,6 +9,7 @@ By Lagrangian function, coefficient $$\alpha$$ and fulfilling KKT(Karush-Kuhn-Tu
 $$\max_\alpha \sum_{i=1}^n \alpha_i - \frac{1}{2} \sum_{ij} \alpha_i \alpha_j y_i y_j x_i^T x_j$$
 subject to $$\alpha_i \geq 0$$ and $$\sum_i \alpha_i y_i = 0$$ for $$i = 1,...,n$$
 
+## Import neccesary lib, MNIST dataset
 ```py
 import mathlabplot
 import scipy
