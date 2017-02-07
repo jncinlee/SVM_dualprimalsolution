@@ -2,7 +2,7 @@
 Provide dual solution for linear SVM and compare its run time performance on MNIST dataset from http://yann.lecun.com/exdb/mnist/. We first state the primal problem of hard margin linear SVM as
 
 $$\min_{w,b} ||w||^2 $$
-subject to $$y_i(w^Tx_i+b) \leq 1,$$ for $$i = 1,...,n$$
+subject to $$y_i(w^Tx_i+b) \geq 1,$$ for $$i = 1,...,n$$
 
 By Lagrangian function, coefficient $$\alpha$$ and fulfilling KKT(Karush-Kuhn-Tucker) conditions, we could solve for dual problem that optimizing $$\alpha$$ while minizing $$w, b$$ in the primal problem. That is written
 
