@@ -164,7 +164,6 @@ print w_dual.shape, b_dual
 
 ## Result of run time comparison
 
+If we change to soft-margin SVM with slack variable C, and changing the notation of label. We could generate a run time comparison betwenn Primal solution and Dual solution. The run time for Dual solution is almost one-half to the Primal, which makes it a more convenient way of solving SVM.
 
-![alt tag](https://cloud.githubusercontent.com/assets/15204857/12089256/44835402-b2e3-11e5-8c11-9a856a8424db.png "Up and In Option")
-
-
+![alt tag](https://github.com/jncinlee/SVM_dualprimalsolution/blob/master/compare%20dual%20primal.png "Primal Dual run time comparison")
