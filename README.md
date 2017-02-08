@@ -109,5 +109,62 @@ print w_prim.shape, b_prim
 
 ## Thirdly by solving dual problem on CVXOPT
 
+The objective for the corresponding dual problem is to minimize the objective function, and state as matrix format as below,
+$$\max_\alpha \sum_i \alpha_i - \frac{1}{2} \sum_{ij} \alpha_i \alpha_j y_i y_j x_i^T x_j$$
+subject to $$\alpha_i \geq 0$$ and $$\sum_i \alpha_i y_i = 0 \mbox{ for } i = 1,...,n$$
+
+\begin{equation*}
+\begin{aligned}
+    & \min_{0 \leq \beta_i \leq C} & \frac{1}{2} \alpha^T \mathbf{H} \alpha - \mathbf{1}^T \alpha \\
+    & \mbox{s.t } & \alpha \geq \mathbf{0} \\
+    & \mbox{where} & \mathbf{H} = yy^T \odot XX^T
+\end{aligned}
+\end{equation*}
+
+Then, given the $\alpha$, the parameter of the SVM can be obtained as:
+$$
+w = \sum_i \alpha_i y_i x_i
+$$
+where $b$ can generate as
+$$
+b = \frac{1}{\# SV} \sum_{i \in SV} \left( y_i - \sum_{j=1}^n \alpha_j y_j x_i^T x_j \right) 
+$$
+and `SV` is the set of indices corresponding to the unbound support vectors.
+
+```py
+cvxopt.solvers.options['show_progress'] = False
+
+# Prepare the matrices for the quadratic program
+def getDual(Z,y):
+    nb = len(Z)
+    nt = len(y)
+    P = cvxopt.matrix((numpy.outer(y,y) * numpy.dot(Z,Z.T)))
+    #P = cvxopt.matrix(((numpy.outer(Ttrain,Ttrain))*(numpy.dot(Xtrain,Xtrain.T)*-1)))
+    q = cvxopt.matrix(numpy.ones(nb)*-1.,(nb,1))
+    G = cvxopt.matrix(numpy.diag(numpy.ones(nb)* -1.)) 
+    h = cvxopt.matrix(numpy.zeros(nb))
+    A = cvxopt.matrix(y,(1,nt))
+    b = cvxopt.matrix(0.0)
+    return P,q,G,h,A,b
+        
+P,q,G,h,A,b = getDual(Xtrain,Ttrain)
+                
+# Train the model (i.e. compute the alphas)
+alpha = numpy.array(cvxopt.solvers.qp(P,q,G,h,A,b)['x']).flatten()
+
+w_dual = numpy.dot(Xtrain.T,Ttrain*alpha)
+
+SV = (alpha>1e-6)
+uSV = SV*(alpha<1e-6)
+b_dual = 1.0/(sum(uSV)+10^-10)*(Ttrain[uSV]-numpy.dot(numpy.dot(Xtrain[uSV,:],Xtrain.T),alpha*Ttrain)).sum()
+
+print alpha.shape
+print w_dual.shape, b_dual
+```
+
+## Result of run time comparison
+
+
+![alt tag](https://cloud.githubusercontent.com/assets/15204857/12089256/44835402-b2e3-11e5-8c11-9a856a8424db.png "Up and In Option")
 
 
