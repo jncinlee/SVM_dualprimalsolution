@@ -9,7 +9,7 @@ By Lagrangian function, coefficient $$\alpha$$ and fulfilling KKT(Karush-Kuhn-Tu
 $$\max_\alpha \sum_{i=1}^n \alpha_i - \frac{1}{2} \sum_{ij} \alpha_i \alpha_j y_i y_j x_i^T x_j$$
 subject to $$\alpha_i \geq 0$$ and $$\sum_i \alpha_i y_i = 0$$ for $$i = 1,...,n$$
 
-First import neccesary lib, MNIST dataset as training part and testing part with its label
+## First import neccesary lib, MNIST dataset as training part and testing part with its label
 
 ```py
 # Load libraries
@@ -48,8 +48,66 @@ Ttrain = Ttrain[R]
 Xtest
 Ttest
 ```
-Second by solving convex optimization problem by CVXOPT in primal problem
+## Second by solving convex optimization problem by CVXOPT in primal problem
 
-Thirdly by solving dual problem
+our objective function and restraint is, vector label pairs denote as $(x_i, y_i)$ for label $y_i \in (1, -1)$ for $i = 1...N$
+\begin{equation*}
+\begin{aligned}
+    & \min_{w,b} & ||w||^2  \\
+    & \mbox{s.t } & y_i(w^Tx_i + b) \geq 1 \\
+\end{aligned}
+\end{equation*}
+
+And could be rewritten as optimization problem of CVXOPT as below,
+\begin{equation*}
+\begin{aligned}
+    & \min_{\alpha} & \frac{1}{2}\alpha^T P \alpha \\
+    & \mbox{s.t } & -1 \times \left(\mathbf{X} | \mathbf{1} \right) \alpha \leq \frac{\mathbf{1}}{y} \\
+\end{aligned}
+\end{equation*}
+
+where $\alpha 
+= \left( \begin{array}{c}
+w_1     \\
+\vdots  \\
+w_{748} \\
+b  \end{array} \right)$ and $\mathbf{1}$ element-wise divided by vector $y$
+
+```py
+cvxopt.solvers.options['show_progress'] = False
+case_n = len(Xtrain)   #1000
+dim_n = len(Xtrain[0]) #784
+
+# Prepare the matrices for the quadratic program
+def getPrim(Z,y):
+    case_n = len(Z)   #1000
+    dim_n = len(Z[0]) #784
+    P1 = numpy.asarray(numpy.diag(numpy.ones(dim_n)))
+    P2 = numpy.zeros([1, dim_n]) #collect P2
+    P3 = numpy.zeros([1, 1])
+    Pup = numpy.concatenate((P1,P2.T),axis = 1)
+    Pdown = numpy.concatenate((P2,P3),axis = 1)
+    P = cvxopt.matrix(numpy.concatenate((Pup,Pdown), axis = 0))
+    q = cvxopt.matrix(numpy.zeros([dim_n +1 ,1]))
+    G = cvxopt.matrix(numpy.concatenate((Z*-1.,numpy.ones([case_n,1])*-1.), axis = 1))     #combine G1 G2
+    h = cvxopt.matrix(numpy.zeros(case_n)/y)
+    A = cvxopt.matrix(numpy.zeros([1, dim_n +1]))
+    b = cvxopt.matrix(0.0)
+    return P,q,G,h,A,b
+        
+P,q,G,h,A,b = getPrim(Xtrain, Ttrain)
+                
+# Train the model (i.e. compute the alphas)
+alpha = numpy.array(cvxopt.solvers.qp(P,q,G,h)['x']).flatten()
+
+w_prim = alpha[:dim_n]
+b_prim = alpha[dim_n:dim_n+1]
+
+print alpha.shape
+print w_prim.shape, b_prim
+```
+
+## Thirdly by solving dual problem on CVXOPT
+
 
 
